@@ -4,14 +4,14 @@ import Interfaces.Interactive;
 import Interfaces.PixelFilter;
 import core.DImage;
 
-public class BallTrackingProject implements PixelFilter, Interactive {
+public class btp implements PixelFilter, Interactive {
 
     private short threshold;
     private short red;
     private short blue;
     private short green;
 
-    public BallTrackingProject() {
+    public btp() {
         threshold = 32;
     }
 
