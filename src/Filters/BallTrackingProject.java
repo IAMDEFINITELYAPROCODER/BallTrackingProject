@@ -21,6 +21,16 @@ public class BallTrackingProject implements PixelFilter, Interactive {
         short[][] green = image.getGreenChannel();
         short[][] blue = image.getBlueChannel();
 
+        // doing the masking
+        doMasking(image, red, green , blue);
+
+        //Locate center
+        findingCenter(red, green, blue);
+
+        return image;
+    }
+
+    private void doMasking(DImage image, short[][] red, short[][] green, short[][] blue) {
         for (int r = 0; r < image.getHeight(); r++) {
             for (int c = 0; c < image.getWidth(); c++) {
                 short colorDistance = findColorDistance(red[r][c], green[r][c], blue[r][c]);
@@ -36,9 +46,26 @@ public class BallTrackingProject implements PixelFilter, Interactive {
                 }
             }
         }
+        image.setColorChannels(red, green, blue);
+    }
 
-        image.setColorChannels(red, blue, green);
-        return image;
+    private void findingCenter(short[][] red, short[][] green, short[][] blue) {
+        short averageRow = 0, averageCol = 0, Whitepixels = 0;
+        for (int row = 0; row < red.length; row++) {
+            for (int col = 0; col < red[row].length; col++) {
+                if (red[row][col] == 255 && green[row][col] == 255 && blue[row][col] == 255) {
+                    averageRow += row;
+                    averageCol += col;
+                    Whitepixels ++;
+                }
+            }
+        }
+        averageRow /= Whitepixels;
+        averageCol /= Whitepixels;
+
+        red[averageRow][averageCol] = 255;
+        green[averageRow][averageCol] = 0;
+        blue[averageRow][averageCol] = 0;
     }
 
     @Override
