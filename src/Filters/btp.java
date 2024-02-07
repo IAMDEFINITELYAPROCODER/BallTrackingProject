@@ -60,9 +60,10 @@ public class btp implements PixelFilter, Interactive {
                 }
             }
         }
-        averageRow /= Whitepixels;
-        averageCol /= Whitepixels;
-
+        if (Whitepixels != 0) {
+            averageRow /= Whitepixels;
+            averageCol /= Whitepixels;
+        }
         red[averageRow][averageCol] = 255;
         green[averageRow][averageCol] = 0;
         blue[averageRow][averageCol] = 0;
