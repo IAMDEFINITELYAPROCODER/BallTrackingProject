@@ -4,7 +4,7 @@ import core.DImage;
 import javax.swing.*;
 
 public class BlurFilter implements PixelFilter {
-    int radius =  6;
+    int radius =  6; //test
     @Override
     public DImage processImage(DImage img) {
 
