@@ -8,17 +8,19 @@ public class btp implements PixelFilter, Interactive {
 
     private short threshold;
     private short red;
-    private short red2;
     private short blue;
-    private short blue2;
     private short green;
+    private short red2;
+    private short blue2;
     private short green2;
+
+
 
     public btp() {
         threshold = 32;
-        red2 = 245;
-        blue2 = 64;
-        green2 = 75;
+        red2 = 175;
+        green2 = 144;
+        blue2 = 0;
     }
 
     @Override
@@ -42,17 +44,17 @@ public class btp implements PixelFilter, Interactive {
     private void doMasking(DImage image, short[][] red, short[][] green, short[][] blue) {
         for (int r = 0; r < image.getHeight(); r++) {
             for (int c = 0; c < image.getWidth(); c++) {
-                short colorDistance = findColorDistance(red[r][c], green[r][c], blue[r][c], this.red, this.green, this.blue);
-                short colorDistance2 = findColorDistance(red[r][c], green[r][c], blue[r][c], this.red2, this.green2, this.blue2);
+                double colorDistance = findColorDistance(red[r][c], green[r][c], blue[r][c], this.red, this.green, this.blue);
+                double colorDistance2 = findColorDistance(red[r][c], green[r][c], blue[r][c], this.red2, this.green2, this.blue2);
                 if (colorDistance <= threshold) {
                     red[r][c] = 255;
                     green[r][c] = 255;
                     blue[r][c] = 255;
                 }
                 else if (colorDistance2 <= threshold) {
-                    red[r][c] = 255;
-                    green[r][c] = 255;
-                    blue[r][c] = 255;
+                    red[r][c] = 125;
+                    green[r][c] = 125;
+                    blue[r][c] = 125;
                 }
                 else {
                     red[r][c] = 0;
@@ -79,6 +81,8 @@ public class btp implements PixelFilter, Interactive {
             averageRow /= Whitepixels;
             averageCol /= Whitepixels;
         }
+        //System.out.println(averageRow + " gg " + averageCol);
+        //System.out.println(red.length + " " + red[0].length);
 
         red[(short)averageRow][(short)averageCol] = 255;
         green[(short)averageRow][(short)averageCol] = 0;
@@ -108,7 +112,7 @@ public class btp implements PixelFilter, Interactive {
         }
     }
 
-    private short findColorDistance(short r, short g, short b, short red, short blue, short green) {
-        return (short)Math.sqrt( Math.pow(Math.abs(r-red), 2) + Math.pow(Math.abs(b-blue), 2) + Math.pow(Math.abs(g-green), 2));
+    private double findColorDistance(short r, short g, short b, short red, short green, short blue) {
+        return Math.sqrt( Math.pow(Math.abs(r-red), 2) + Math.pow(Math.abs(b-blue), 2) + Math.pow(Math.abs(g-green), 2));
     }
 }
