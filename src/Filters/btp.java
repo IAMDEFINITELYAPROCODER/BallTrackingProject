@@ -50,7 +50,7 @@ public class btp implements PixelFilter, Interactive {
     }
 
     private void findingCenter(short[][] red, short[][] green, short[][] blue) {
-        short averageRow = 0, averageCol = 0, Whitepixels = 0;
+        int averageRow = 0, averageCol = 0, Whitepixels = 0;
         for (int row = 0; row < red.length; row++) {
             for (int col = 0; col < red[row].length; col++) {
                 if (red[row][col] == 255 && green[row][col] == 255 && blue[row][col] == 255) {
@@ -64,9 +64,12 @@ public class btp implements PixelFilter, Interactive {
             averageRow /= Whitepixels;
             averageCol /= Whitepixels;
         }
-        red[averageRow][averageCol] = 255;
-        green[averageRow][averageCol] = 0;
-        blue[averageRow][averageCol] = 0;
+        System.out.println(averageRow + " gg " + averageCol);
+        System.out.println(red.length + " " + red[0].length);
+
+        red[(short)averageRow][(short)averageCol] = 255;
+        green[(short)averageRow][(short)averageCol] = 0;
+        blue[(short)averageRow][(short)averageCol] = 0;
     }
 
     @Override
