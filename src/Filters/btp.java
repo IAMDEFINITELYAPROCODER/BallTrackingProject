@@ -17,9 +17,12 @@ public class btp implements PixelFilter, Interactive {
 
     @Override
     public DImage processImage(DImage image) {
-        short[][] red = image.getRedChannel();
-        short[][] green = image.getGreenChannel();
-        short[][] blue = image.getBlueChannel();
+        BlurFilter blur = new BlurFilter();
+        DImage newImage = blur.processImage(image);
+
+        short[][] red = newImage.getRedChannel();
+        short[][] green = newImage.getGreenChannel();
+        short[][] blue = newImage.getBlueChannel();
 
         // doing the masking
         doMasking(image, red, green , blue);
