@@ -4,21 +4,22 @@ import Interfaces.Interactive;
 import Interfaces.PixelFilter;
 import core.DImage;
 
+import java.util.ArrayList;
+
 public class btp implements PixelFilter, Interactive {
 
-    private short threshold;
+    private static short threshold = 35;
     private short red;
-    private short red2;
-    private short blue;
-    private short blue2;
+    private static short red2 = 245;
+    private static short red3 = 255;
+    private static short blue;
+    private static short blue2 = 64;
     private short green;
-    private short green2;
+    private static short green2 = 75;
+    private ArrayList<Point2> whitePixels;
 
     public btp() {
-        threshold = 35;
-        red2 = 245;
-        blue2 = 64;
-        green2 = 75;
+        whitePixels = new ArrayList<>();
     }
 
     @Override
@@ -31,7 +32,7 @@ public class btp implements PixelFilter, Interactive {
         short[][] blue = newImage.getBlueChannel();
 
         // doing the masking
-        doMasking(image, red, green, blue);
+        //doMasking(image, red, green, blue);
 
         //Locate center
         findingCenter(red, green, blue);
@@ -63,15 +64,46 @@ public class btp implements PixelFilter, Interactive {
     }
 
     private void findingCenter(short[][] red, short[][] green, short[][] blue) {
-        int side = 3; // square size
-        int r = (int) (Math.random() * red.length);
-        int c = (int) (Math.random() * red[0].length);
-        while (red[r][c] != 255 && green[r][c] != 255 && blue[r][c] != 255) {
-            r = (int) (Math.random() * red.length);
-            c = (int) (Math.random() * red[0].length);
-        }
-        printCenter(red, green, blue, r, c, side);
+//        int side = 3; // square size
+//        int r = (int) (Math.random() * red.length);
+//        int c = (int) (Math.random() * red[0].length);
+//        while (red[r][c] != 255 && green[r][c] != 255 && blue[r][c] != 255) {
+//            r = (int) (Math.random() * red.length);
+//            c = (int) (Math.random() * red[0].length);
+//        }
+//        printCenter(red, green, blue, r, c, side);
 
+        Point2 whiteRC = new Point2(0, 0);
+        for (int r = 0; r < red.length; r++) {
+            for (int c = 0; c < red[r].length; c++) {
+                if (red[r][c] == 255 && green[r][c] == 255 && blue[r][c] == 255) {
+                    whiteRC.setR(r);
+                    whiteRC.setC(c);
+                   whitePixels.add(whiteRC);
+                }
+            }
+        }
+
+        int randomWhitePixel = (int)(1 + Math.random() * whitePixels.size());
+        System.out.println(randomWhitePixel + " is random index");
+        Point2 rightSide = new Point2(0, 0);
+        for (int r = whitePixels.get(randomWhitePixel).getR(); r < red.length; r++) {
+            for (int c = whitePixels.get(randomWhitePixel).getC(); c < red[r].length - 1; c++) {
+                if (red[r][c] == 255 && green[r][c] == 255 && blue[r][c] == 255 && red[r][c + 1] == 0 && green[r][c + 1] == 0 && blue[r][c + 1] == 0) {
+                    if (MagnitudeOf(r, c, whitePixels.get(randomWhitePixel).getR(), whitePixels.get(randomWhitePixel).getC()) >= 84) {
+                        rightSide.setR(r);
+                        rightSide.setC(c);
+                        //System.out.println(" came inside ");
+                    }
+                }
+            }
+        }
+        System.out.println("R " + rightSide.getR() + " \t C " + rightSide.getR());
+
+    }
+
+    private int MagnitudeOf(int r, int c, int r2, int c2) {
+        return (int)( Math.sqrt( Math.pow(r2 - r, 2) + Math.pow(c2 - c, 2) ) );
     }
 
     private void printCenter(short[][] red, short[][] green, short[][] blue, int r, int c, int side) {
