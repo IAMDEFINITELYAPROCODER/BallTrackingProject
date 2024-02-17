@@ -12,6 +12,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.Objects;
 
 /**
  * Display class for working with image filters
@@ -42,6 +43,8 @@ public class DisplayWindow extends PApplet {
     private int initWidth = 900;
     private int initHeight = 800;
 
+    private static String DEFAULT_FILTER = "DoNothingFilter";
+
     public void settings() {
         initializeImageSource(args);
 
@@ -61,6 +64,8 @@ public class DisplayWindow extends PApplet {
         size(initWidth, initHeight);
         centerX = width / 2;
         centerY = height / 2;
+
+        this.filter = loadNewFilter(DEFAULT_FILTER);
     }
 
     private void initializeImageSource(String[] args) {
@@ -116,11 +121,14 @@ public class DisplayWindow extends PApplet {
 
     private String fileChooser() {
         String userDirLocation = System.getProperty("user.dir");
-        File userDir = new File(userDirLocation);
+        File userDir = new File(userDirLocation + "/images");
+
         JFileChooser fc = new JFileChooser(userDir);
         int returnVal = fc.showOpenDialog(null);
         File file = fc.getSelectedFile();
-        return file.getAbsolutePath();
+
+        if (file != null) return file.getAbsolutePath();
+        else return userDir.getAbsolutePath() + "/1.png";
     }
 
     private DImage tryToLoadStillImage(String moviePath) {
@@ -162,18 +170,11 @@ public class DisplayWindow extends PApplet {
 
     public void draw() {
         background(200);
-        if (source == IMAGE) {
-            applyFilterToImage(inputImage.getPImage());
+        if (!paused) {
+            fetchImageAndApplyFilter();
         }
-        if (source == WEBCAM) {
-            if (webcam == null) return;
-            BufferedImage img = webcam.getImage();
-            if (img == null) return;
-            applyFilterToImage(new PImage(img));
-        }
-        if (frame == null) {
-            return;
-        }
+        if (frame == null) return;
+
         if (oldFilteredFrame == null) oldFilteredFrame = frame;
 
         DImage currentFiltered = (!loading && filteredFrame != null) ? filteredFrame : oldFilteredFrame;
@@ -207,6 +208,8 @@ public class DisplayWindow extends PApplet {
 
         if (paused) {
             text("Press 'p' to unpause", 620, height - 22);
+        } else {
+            text("Press 'p' to pause", 620, height - 22);
         }
 
         stroke(200);
@@ -217,6 +220,19 @@ public class DisplayWindow extends PApplet {
         if (filter != null && initiallyPaused) {          // hack hack!  display one frame, then pause
             initiallyPaused = false;
             paused = true;
+        }
+    }
+
+    private void fetchImageAndApplyFilter() {
+        if (source == IMAGE) {
+            applyFilterToImage(inputImage.getPImage());
+        }
+        if (source == WEBCAM) {
+            if (webcam == null) return;
+            BufferedImage img = webcam.getImage();
+            if (img == null) return;
+            applyFilterToImage(new PImage(img));
+
         }
     }
 
@@ -256,8 +272,6 @@ public class DisplayWindow extends PApplet {
     }
 
     public void applyFilterToImage(PImage img) {
-        if (paused) return;
-
         oldFilteredFrame = filteredFrame;
         loading = true;
 
@@ -283,17 +297,29 @@ public class DisplayWindow extends PApplet {
     }
 
     private DImage runFilters(DImage frameToFilter) {
-        if (filter != null) return filter.processImage(frameToFilter);
+        if (filter != null) {
+            DImage output = filter.processImage(frameToFilter);
+            if (output == null) {
+                System.err.println("Your filter has returned a null output.  Check your processImage method!");
+                System.exit(1);
+            }
+        }
         return frameToFilter;
     }
 
     public void keyReleased() {
         if (key == 'f' || key == 'F') {
-            this.filter = loadNewFilter();
+            this.filter = selectNewFilterDialog();
+            fetchImageAndApplyFilter();
+            paused = false; // hack hack; can we just apply new filter to current frame instead of unpausing?
         }
 
         if (key == 's' || key == 'S') {
             currentlyViewingFilteredImage = !currentlyViewingFilteredImage;
+        }
+
+        if (key == 'b' || key == 'B') {
+            displayVideoSourceChoiceDialog();
         }
 
         if (key == 'p' || key == 'P') {
@@ -323,11 +349,10 @@ public class DisplayWindow extends PApplet {
         }
     }
 
-    private PixelFilter loadNewFilter() {
-        String name = JOptionPane.showInputDialog("Type the name of your processImage class (without the .java)");
+    private PixelFilter loadNewFilter(String name) {
         PixelFilter f = null;
         try {
-            Class c = Class.forName("Filters." + name);
+            Class c = Class.forName("Filters." + name.toString());
             f = (PixelFilter) c.newInstance();
         } catch (Exception e) {
             System.err.println("Something went wrong when instantiating your class!  (running its constructor). " +
@@ -335,8 +360,20 @@ public class DisplayWindow extends PApplet {
                     "no inputs!");
             System.err.println(e.getMessage());
         }
-
         return f;
+    }
+
+    private PixelFilter selectNewFilterDialog() {
+        String userDirLocation = System.getProperty("user.dir");
+        File userDir = new File(userDirLocation + "/src/Filters");
+
+        String[] filters = new String[Objects.requireNonNull(userDir.list()).length];
+        for (int i = 0; i < filters.length; i++) {
+            filters[i] = Objects.requireNonNull(userDir.list())[i].replace(".java", "");
+        }
+        Object name = JOptionPane.showInputDialog(null, "Select your filter", "Filter Selection", JOptionPane.QUESTION_MESSAGE, null, filters, DEFAULT_FILTER);
+
+        return loadNewFilter(name.toString());
     }
 
     public static void showFor(String filePath) {
@@ -344,6 +381,11 @@ public class DisplayWindow extends PApplet {
     }
 
     public static void showFor(String filePath, int width, int height) {
+        PApplet.main("core.DisplayWindow", new String[]{"filepath:" + filePath, "dimensions:" + width + "x" + height});
+    }
+
+    public static void showFor(String filePath, int width, int height, String default_filter) {
+        DEFAULT_FILTER = default_filter;
         PApplet.main("core.DisplayWindow", new String[]{"filepath:" + filePath, "dimensions:" + width + "x" + height});
     }
 
