@@ -27,16 +27,18 @@ public class btp implements PixelFilter, Interactive {
     public DImage processImage(DImage image) {
         BlurFilter blur = new BlurFilter();
         DImage newImage = blur.processImage(image);
+        FindCenters centerFind = new FindCenters();
 
         short[][] red = newImage.getRedChannel();
         short[][] green = newImage.getGreenChannel();
         short[][] blue = newImage.getBlueChannel();
 
         // doing the masking
-        doMasking(image, red, green , blue);
+        doMasking(newImage, red, green , blue);
 
-        //Locate center
-        findingCenter(red, green, blue);
+        // Locate center
+        centerFind.processImage(image);
+        // findingCenter(red, green, blue);
 
         return image;
     }
