@@ -1,7 +1,6 @@
 package Filters;
 import Interfaces.PixelFilter;
 import core.DImage;
-
 import java.util.ArrayList;
 
 public class FindCenters implements PixelFilter {
@@ -9,6 +8,7 @@ public class FindCenters implements PixelFilter {
 
     @Override
     public DImage processImage(DImage image) {
+
         short[][] red = image.getRedChannel();
         short[][] green = image.getGreenChannel();
         short[][] blue = image.getBlueChannel();
