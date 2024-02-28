@@ -13,7 +13,7 @@ public class FindCenters implements PixelFilter {
         short[][] green = image.getGreenChannel();
         short[][] blue = image.getBlueChannel();
 
-        // getting all white pixels
+        // get all white pixels into an arraylist
         allWhitePixels = new ArrayList<>();
         Point2 p;
         for (int r = 0; r < red.length; r++) {
@@ -79,7 +79,6 @@ public class FindCenters implements PixelFilter {
         int rDist = (center.getR() - Right);
         int cDist = (center.getC() - Up);
         radius = (int)Math.sqrt(rDist*rDist + cDist*cDist);
-        System.out.println("Radius: " +  radius + " Center: " + center);
 
         deleteCurrentCircle(center, radius, red, green, blue);
 
