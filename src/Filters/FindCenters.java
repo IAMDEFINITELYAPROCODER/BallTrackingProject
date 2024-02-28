@@ -25,7 +25,7 @@ public class FindCenters implements PixelFilter {
             }
         }
 
-        // getting and projecting the centers onto the screen
+        // getting and printing the centers onto the screen
         while (allWhitePixels.size() > 0){
             Point2 center = Center(red, green, blue, allWhitePixels);
             // setting 5 by 5 grid for the center so that it is visible
